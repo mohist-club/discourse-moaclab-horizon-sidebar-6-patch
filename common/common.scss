@@ -531,35 +531,104 @@
         margin: 0;
         padding: 0;
         list-style: none;
+        border-top: 1px solid var(--moac-horizon-sidebar-line);
       }
 
       .moac-horizon-faq-latest__item {
         margin: 0;
-        padding: 0.8rem 0;
+        padding: 0;
         border-bottom: 1px solid var(--moac-horizon-sidebar-line);
-
-        &:first-child {
-          padding-top: 0;
-        }
       }
 
       .moac-horizon-faq-latest__link {
-        display: block;
-        color: var(--moac-horizon-sidebar-accent);
-        font-size: #{$top_topics_item_title_font_size}px;
-        line-height: 1.42;
-        letter-spacing: -0.015em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        box-sizing: border-box;
+        min-height: 44px;
+        padding: 1rem 0.75rem;
+        background: color-mix(in srgb, var(--primary) 3.5%, transparent);
+        color: var(--primary);
         text-decoration: none;
+        transition: background-color 150ms ease;
 
         &:hover {
-          text-decoration: underline;
+          background: color-mix(in srgb, var(--primary) 7%, transparent);
         }
 
         &:focus-visible {
           outline: 2px solid var(--tertiary);
-          outline-offset: 3px;
-          border-radius: 2px;
+          outline-offset: -2px;
+          border-radius: 3px;
         }
+      }
+
+      .moac-horizon-faq-latest__source {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        color: var(--primary-medium);
+        font-size: 12px;
+        line-height: 1.2;
+
+        strong {
+          overflow: hidden;
+          color: var(--primary);
+          font-weight: 700;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        time {
+          flex: none;
+          white-space: nowrap;
+        }
+      }
+
+      .moac-horizon-faq-latest__logo {
+        display: grid;
+        flex: 0 0 26px;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        margin-right: 0.55rem;
+        overflow: hidden;
+        border-radius: 50%;
+        background: var(--secondary);
+        color: var(--primary-medium);
+        font-size: 13px;
+        font-weight: 700;
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .moac-horizon-faq-latest__separator {
+        flex: none;
+        margin: 0 0.45rem;
+      }
+
+      .moac-horizon-faq-latest__title {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--primary-high);
+        font-size: #{$top_topics_item_title_font_size}px;
+        line-height: 1.35;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .moac-horizon-faq-latest__metrics {
+        color: var(--primary-medium);
+        font-size: 12px;
+        line-height: 1.25;
       }
 
       .moac-horizon-faq-latest__status {

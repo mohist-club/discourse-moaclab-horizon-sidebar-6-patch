@@ -438,6 +438,32 @@ export default apiInitializer((api) => {
     return `/t/${slug}/${topic.id}`;
   }
 
+  function relativeTime(dateString) {
+    const timestamp = Date.parse(dateString);
+    if (!Number.isFinite(timestamp)) {
+      return "";
+    }
+
+    const elapsedSeconds = Math.max(0, (Date.now() - timestamp) / 1000);
+    const units = [
+      ["year", 365 * 24 * 60 * 60],
+      ["month", 30 * 24 * 60 * 60],
+      ["day", 24 * 60 * 60],
+      ["hour", 60 * 60],
+      ["minute", 60],
+    ];
+    const locale = document.documentElement.lang || "zh-CN";
+    const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+
+    for (const [unit, seconds] of units) {
+      if (elapsedSeconds >= seconds) {
+        return formatter.format(-Math.floor(elapsedSeconds / seconds), unit);
+      }
+    }
+
+    return formatter.format(0, "second");
+  }
+
   function createFaqLatestModule() {
     const module = document.createElement("section");
     module.className = `rs-component ${faqModuleClass}`;
@@ -485,7 +511,10 @@ export default apiInitializer((api) => {
 
     module.dataset.state = "loading";
     const sourceKey = module.dataset.sourceKey;
-    const topics = await latestFaqTopics(sourceCategoryId);
+    const [topics, logos] = await Promise.all([
+      latestFaqTopics(sourceCategoryId),
+      categoryLogos(),
+    ]);
     if (!module.isConnected || module.dataset.sourceKey !== sourceKey) {
       return;
     }
@@ -512,6 +541,8 @@ export default apiInitializer((api) => {
 
     const list = document.createElement("ul");
     list.className = "moac-horizon-faq-latest__list";
+    const sourceLabel = settings.faq_latest_source_label || "问答/求助";
+    const sourceLogoUrl = logos.get(sourceCategoryId);
 
     visibleTopics.forEach((topic) => {
       const item = document.createElement("li");
@@ -520,7 +551,49 @@ export default apiInitializer((api) => {
       const link = document.createElement("a");
       link.className = "moac-horizon-faq-latest__link";
       link.href = topicUrl(topic);
-      link.textContent = topic.unicode_title || topic.title;
+
+      const source = document.createElement("span");
+      source.className = "moac-horizon-faq-latest__source";
+
+      const logo = document.createElement("span");
+      logo.className = "moac-horizon-faq-latest__logo";
+      logo.setAttribute("aria-hidden", "true");
+
+      if (sourceLogoUrl) {
+        const image = document.createElement("img");
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.src = sourceLogoUrl;
+        logo.appendChild(image);
+      } else {
+        logo.textContent = "?";
+      }
+
+      const sourceName = document.createElement("strong");
+      sourceName.textContent = sourceLabel;
+
+      const separator = document.createElement("span");
+      separator.className = "moac-horizon-faq-latest__separator";
+      separator.setAttribute("aria-hidden", "true");
+      separator.textContent = "·";
+
+      const activityDate = topic.last_posted_at || topic.created_at;
+      const time = document.createElement("time");
+      time.dateTime = activityDate;
+      time.textContent = relativeTime(activityDate);
+
+      source.append(logo, sourceName, separator, time);
+
+      const title = document.createElement("span");
+      title.className = "moac-horizon-faq-latest__title";
+      title.textContent = topic.unicode_title || topic.title;
+
+      const metrics = document.createElement("span");
+      metrics.className = "moac-horizon-faq-latest__metrics";
+      metrics.textContent = `${topic.like_count || 0} 点赞 · ${topic.reply_count || 0} 评论`;
+
+      link.append(source, title, metrics);
 
       item.appendChild(link);
       list.appendChild(item);
@@ -551,7 +624,7 @@ export default apiInitializer((api) => {
 
     const sourceCategoryId =
       Number(settings.faq_latest_source_category_id) || 4;
-    const sourceKey = `${sourceCategoryId}:${settings.faq_latest_topic_limit}:${settings.faq_latest_heading}`;
+    const sourceKey = `${sourceCategoryId}:${settings.faq_latest_topic_limit}:${settings.faq_latest_heading}:${settings.faq_latest_source_label}`;
     let module = existingModule;
 
     if (module?.dataset.sourceKey !== sourceKey) {

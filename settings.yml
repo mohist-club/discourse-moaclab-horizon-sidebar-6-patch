@@ -121,6 +121,13 @@ faq_latest_heading:
     en: "Heading displayed above the latest Q&A topic list."
     zh_CN: "最新问答话题列表上方显示的标题。"
 
+faq_latest_source_label:
+  type: string
+  default: "问答/求助"
+  description:
+    en: "Source label displayed in each latest Q&A card."
+    zh_CN: "每张最新问答卡片顶部显示的来源名称。"
+
 faq_latest_topic_limit:
   type: integer
   default: 5

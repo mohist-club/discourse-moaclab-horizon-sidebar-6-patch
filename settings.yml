@@ -1,0 +1,85 @@
+prevent_anonymous_attachment_404:
+  type: bool
+  default: true
+  description:
+    en: "Stop anonymous attachment clicks before Discourse shows its protected-file 404, and show the native login-required dialog instead."
+    zh_CN: "游客点击附件时阻止继续跳转 404，并保留 Discourse 原生的登录后下载提示。"
+
+hide_tags_sidebar_section:
+  type: bool
+  default: true
+  description:
+    en: "Hide the native Tags section from the left sidebar."
+    zh_CN: "隐藏左侧栏中的原生标签（Tags）区块。"
+
+disable_mobile_category_intro_sticky:
+  type: bool
+  default: true
+  description:
+    en: "Let category introductions scroll normally on mobile without changing the native top navigation."
+    zh_CN: "移动端让类别介绍随页面滚动，不修改原生顶部导航的吸顶行为。"
+
+enable_top_topics_polish:
+  type: bool
+  default: true
+  description:
+    en: "Apply Moaclab spacing, typography, and divider refinements to the right-sidebar Top Topics block."
+    zh_CN: "启用右侧热门话题的标题偏移、行距、间距和分隔线优化。"
+
+top_topics_heading_font_size:
+  type: integer
+  default: 20
+  min: 14
+  max: 32
+  description:
+    en: "Top Topics module heading size in pixels."
+    zh_CN: "右侧热门话题模块标题字号，单位为 px。"
+
+top_topics_item_title_font_size:
+  type: integer
+  default: 14
+  min: 12
+  max: 24
+  description:
+    en: "Topic title size in pixels inside the right-sidebar Top Topics list."
+    zh_CN: "右侧热门话题列表中每条话题标题的字号，单位为 px。"
+
+enable_right_sidebar_sticky_stack:
+  type: bool
+  default: true
+  description:
+    en: "Keep Recent Activity and the blocks after it together as a sticky desktop stack."
+    zh_CN: "桌面端将近期活动及其后续区块组合为吸顶内容组。"
+
+right_sidebar_module_heading_font_size:
+  type: integer
+  default: 18
+  min: 14
+  max: 32
+  description:
+    en: "Heading size in pixels for Recent Activity and the right-sidebar modules after it."
+    zh_CN: "近期活动及其后续右侧模块的标题字号，单位为 px。"
+
+enable_exclusive_subcategory_grid:
+  type: bool
+  default: true
+  description:
+    en: "On selected categories, show only the Subcategories block and present it as a logo grid."
+    zh_CN: "在指定类别中，仅显示右侧子类别模块，并将其呈现为 Logo 网格。"
+
+exclusive_subcategory_grid_categories:
+  type: list
+  list_type: category
+  default: "13"
+  description:
+    en: "Categories that use the exclusive right-sidebar subcategory logo grid."
+    zh_CN: "启用右侧子类别 Logo 网格的类别；默认是键盘类别。"
+
+subcategory_grid_columns:
+  type: integer
+  default: 4
+  min: 2
+  max: 6
+  description:
+    en: "Maximum columns in the right-sidebar subcategory logo grid; narrow sidebars automatically use fewer columns."
+    zh_CN: "右侧子类别 Logo 网格的最大列数；侧栏较窄时会自动减少列数。"

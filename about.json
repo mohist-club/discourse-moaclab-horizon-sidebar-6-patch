@@ -1,0 +1,9 @@
+{
+  "name": "Moaclab Horizon Sidebar 6 Patch",
+  "about_url": "https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch",
+  "component": true,
+  "authors": "Moaclab, Codex",
+  "theme_version": "1.4.0",
+  "minimum_discourse_version": "3.0.0",
+  "assets": {}
+}

@@ -257,7 +257,31 @@ export default apiInitializer((api) => {
     );
   }
 
+  function logoMap(categories = []) {
+    return new Map(
+      categories
+        .map((category) => [
+          Number(category.id),
+          category.uploaded_logo?.url || category.logo_url || null,
+        ])
+        .filter(([, logoUrl]) => logoUrl),
+    );
+  }
+
+  function localCategoryLogos() {
+    const routeCategory =
+      api.container.lookup("service:router").currentRoute?.attributes?.category;
+    const site = api.container.lookup("service:site");
+
+    return logoMap([
+      ...(site?.categories || []),
+      ...(routeCategory?.subcategories || []),
+    ]);
+  }
+
   function categoryLogos() {
+    const localLogos = localCategoryLogos();
+
     categoryLogosPromise ??= fetch("/site.json", {
       credentials: "same-origin",
       headers: { Accept: "application/json" },
@@ -271,53 +295,55 @@ export default apiInitializer((api) => {
       .then((site) => {
         const categories =
           site.categories || site.category_list?.categories || [];
-        return new Map(
-          categories.map((category) => [
-            Number(category.id),
-            category.uploaded_logo?.url || category.logo_url || null,
-          ]),
-        );
+        return logoMap(categories);
       })
-      .catch(() => new Map());
+      .catch(() => {
+        categoryLogosPromise = null;
+        return new Map();
+      });
 
-    return categoryLogosPromise;
+    return categoryLogosPromise.then(
+      (remoteLogos) => new Map([...localLogos, ...remoteLogos]),
+    );
   }
 
   async function enhanceSubcategoryGrid() {
     const logos = await categoryLogos();
-    const sidebar = document.querySelector(sidebarSelectors);
-    if (!sidebar) {
-      return;
-    }
 
-    sidebar
+    document
       .querySelectorAll(
-        ".rs-subcategory-list .subcategory-list--item a.badge-category__wrapper",
+        ".rs-component.rs-subcategory-list .subcategory-list--item a.badge-category__wrapper",
       )
       .forEach((link) => {
-        if (link.querySelector(`.${subcategoryLogoClass}`)) {
-          return;
-        }
-
         const categoryId = Number(
           link.querySelector("[data-category-id]")?.dataset.categoryId,
         );
         const logoUrl = logos.get(categoryId);
-        if (!logoUrl) {
+        let logo = link.querySelector(`.${subcategoryLogoClass}`);
+
+        if (!logo) {
+          logo = document.createElement("span");
+          logo.className = subcategoryLogoClass;
+          logo.setAttribute("aria-hidden", "true");
+          link.prepend(logo);
+        }
+
+        if (logoUrl && !logo.querySelector("img")) {
+          const image = document.createElement("img");
+          image.alt = "";
+          image.loading = "lazy";
+          image.decoding = "async";
+          image.src = logoUrl;
+          logo.replaceChildren(image);
           return;
         }
 
-        const logo = document.createElement("span");
-        logo.className = subcategoryLogoClass;
-        logo.setAttribute("aria-hidden", "true");
-
-        const image = document.createElement("img");
-        image.alt = "";
-        image.loading = "lazy";
-        image.decoding = "async";
-        image.src = logoUrl;
-        logo.appendChild(image);
-        link.prepend(logo);
+        if (!logoUrl && !logo.hasChildNodes()) {
+          const fallbackIcon = link.querySelector(".badge-category .d-icon");
+          if (fallbackIcon) {
+            logo.appendChild(fallbackIcon.cloneNode(true));
+          }
+        }
       });
   }
 

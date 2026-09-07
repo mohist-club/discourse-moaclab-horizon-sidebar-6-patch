@@ -15,8 +15,8 @@ Moaclab 的 Discourse 主题组件，用于补充 Horizon Sidebar 6 和 Right Si
   - 工作室模块随页面滚动，并保持在首次显示时的原始纵向位置；
   - 其他类别继续使用原有右侧模块。
 - 在键帽库（ID `8`）和资源（ID `9`）右侧仅显示“最新问答”模块：
-  - 直接复用 Right Sidebar Blocks 自带的 `category-topics` 区块，不再由本组件调用任何类别 JSON 接口；
-  - 数据请求、路由切换和缓存全部交给 Discourse 原生数据层；
+  - 优先复用 Right Sidebar Blocks 自带的 `category-topics` 区块；
+  - 如果原生区块没有渲染出数据，自动用设置中的问答分类 JSON 路径兜底读取；
   - 模块保持原始纵向位置吸顶。
 
 ## Right Sidebar Blocks 配置
@@ -27,7 +27,7 @@ Moaclab 的 Discourse 主题组件，用于补充 Horizon Sidebar 6 和 Right Si
 - 参数 `id`: `4`
 - 参数 `count`: `5`
 
-本组件在键帽库和资源页面只显示这个原生区块，并负责“最新问答”标题、列表样式和吸顶。请删除旧的自定义“最新问答”区块；从 `1.7.0` 起，本组件不会再请求 `/c/faq/4.json`。
+本组件在键帽库和资源页面只显示这个原生区块，并负责“最新问答”标题、列表样式和吸顶。请删除旧的自定义“最新问答”区块；从 `1.7.1` 起，如果原生区块没有数据，会自动读取 `faq_latest_source_path`。
 
 ## 安装或更新
 
@@ -54,5 +54,7 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `enable_exclusive_faq_latest`：启用指定类别的独占“最新问答”模块。
 - `exclusive_faq_latest_categories`：选择显示该模块的类别，默认键帽库和资源。
 - `faq_latest_heading`：模块标题，默认“最新问答”。
+- `faq_latest_source_path`：兜底问答数据路径，默认 `/c/faq/4.json`。
+- `faq_latest_count`：兜底显示条数，默认 `5`。
 
-版本：`1.7.0`
+版本：`1.7.1`

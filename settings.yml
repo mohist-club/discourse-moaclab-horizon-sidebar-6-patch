@@ -112,3 +112,19 @@ faq_latest_heading:
   description:
     en: "Visual heading displayed above the native category-topics block."
     zh_CN: "Right Sidebar Blocks 原生 category-topics 区块上方显示的视觉标题。"
+
+faq_latest_source_path:
+  type: string
+  default: "/c/faq/4.json"
+  description:
+    en: "Fallback JSON path used when the native Right Sidebar Blocks category-topics block has no topics."
+    zh_CN: "当 Right Sidebar Blocks 原生 category-topics 区块没有数据时，用于兜底读取的问答分类 JSON 路径。"
+
+faq_latest_count:
+  type: integer
+  default: 5
+  min: 1
+  max: 20
+  description:
+    en: "Number of fallback latest Q&A topics to show."
+    zh_CN: "兜底最新问答显示的帖子数量。"

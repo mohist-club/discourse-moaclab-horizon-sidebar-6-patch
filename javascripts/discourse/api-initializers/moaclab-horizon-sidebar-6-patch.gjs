@@ -9,6 +9,8 @@ export default apiInitializer((api) => {
   const exclusiveGridClass = "moac-horizon-exclusive-subcategory-grid";
   const exclusiveFaqClass = "moac-horizon-exclusive-faq-latest";
   const subcategoryLogoClass = "moac-horizon-subcategory-logo";
+  const faqLatestFallbackClass = "moac-horizon-faq-latest-fallback";
+  const faqLatestFallbackAttr = "data-moac-horizon-faq-latest-fallback";
   const originalHeadingAttr = "data-moac-horizon-original-heading";
   const originalStickyTopAttr = "data-moac-horizon-original-sticky-top";
   const sidebarSelectors = [
@@ -49,6 +51,8 @@ export default apiInitializer((api) => {
   let applying = false;
   let stickyFrame = null;
   let categoryLogosPromise = null;
+  let faqLatestPromise = null;
+  let faqLatestKey = "";
 
   function guardAnonymousAttachmentClick(event) {
     if (User.current() || event.defaultPrevented) {
@@ -321,6 +325,164 @@ export default apiInitializer((api) => {
     );
   }
 
+  function nativeFaqLatestHasTopics(sidebar) {
+    return Boolean(
+      sidebar.querySelector(
+        `.rs-component.rs-category-topics:not(.${faqLatestFallbackClass}) .category-topics--topic`,
+      ),
+    );
+  }
+
+  function faqLatestContainer(sidebar) {
+    const stack = sidebar.querySelector(`.${stackClass}`);
+    return stack || sidebar;
+  }
+
+  function removeFaqLatestFallback() {
+    document
+      .querySelectorAll(`.${faqLatestFallbackClass}`)
+      .forEach((block) => block.remove());
+  }
+
+  function normalizeFaqLatestPath(path) {
+    const trimmed = String(path || "").trim() || "/c/faq/4.json";
+    return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  }
+
+  function cachedFaqLatest(path, count) {
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem(`moac-horizon-faq-latest:${path}:${count}`),
+      );
+
+      if (cached && Date.now() - cached.savedAt < 5 * 60 * 1000) {
+        return cached.topics;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  }
+
+  function saveFaqLatestCache(path, count, topics) {
+    try {
+      localStorage.setItem(
+        `moac-horizon-faq-latest:${path}:${count}`,
+        JSON.stringify({ savedAt: Date.now(), topics }),
+      );
+    } catch {
+      // Private browsing or storage limits should not block rendering.
+    }
+  }
+
+  async function loadFaqLatestTopics() {
+    const path = normalizeFaqLatestPath(settings.faq_latest_source_path);
+    const count = Number(settings.faq_latest_count) || 5;
+    const key = `${path}:${count}`;
+    const cached = cachedFaqLatest(path, count);
+
+    if (cached) {
+      return cached;
+    }
+
+    if (faqLatestPromise && faqLatestKey === key) {
+      return faqLatestPromise;
+    }
+
+    faqLatestKey = key;
+    faqLatestPromise = fetch(path, {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Unable to load latest Q&A (${response.status})`);
+        }
+        return response.json();
+      })
+      .then((payload) => {
+        const topics = (payload.topic_list?.topics || [])
+          .filter((topic) => !topic.deleted)
+          .slice(0, count)
+          .map((topic) => ({
+            id: topic.id,
+            slug: topic.slug,
+            title: topic.fancy_title || topic.title,
+            replies: topic.reply_count ?? Math.max((topic.posts_count || 1) - 1, 0),
+          }));
+        saveFaqLatestCache(path, count, topics);
+        return topics;
+      })
+      .catch(() => []);
+
+    return faqLatestPromise;
+  }
+
+  function renderFaqLatestFallback(sidebar, topics) {
+    if (!document.body.classList.contains(exclusiveFaqClass)) {
+      return;
+    }
+
+    if (nativeFaqLatestHasTopics(sidebar)) {
+      removeFaqLatestFallback();
+      return;
+    }
+
+    const container = faqLatestContainer(sidebar);
+    let block = container.querySelector(`.${faqLatestFallbackClass}`);
+
+    if (!topics.length) {
+      removeFaqLatestFallback();
+      return;
+    }
+
+    if (!block) {
+      block = document.createElement("section");
+      block.className = `rs-component rs-category-topics ${faqLatestFallbackClass}`;
+      block.setAttribute(faqLatestFallbackAttr, "true");
+      container.prepend(block);
+    }
+
+    const content = document.createElement("div");
+    content.className = "category-topics--content";
+
+    topics.forEach((topic) => {
+      const link = document.createElement("a");
+      link.className = "category-topics--topic";
+      link.href = `/t/${topic.slug || "topic"}/${topic.id}`;
+
+      const title = document.createElement("span");
+      title.className = "category-topics--title";
+      title.textContent = topic.title || "未命名话题";
+
+      const count = document.createElement("span");
+      count.className = "category-topics--posts-count";
+      count.textContent = `${topic.replies || 0} 回复`;
+
+      link.append(title, count);
+      content.append(link);
+    });
+
+    block.replaceChildren(content);
+  }
+
+  function ensureFaqLatestFallback() {
+    const sidebar = document.querySelector(sidebarSelectors);
+
+    if (!sidebar || !document.body.classList.contains(exclusiveFaqClass)) {
+      removeFaqLatestFallback();
+      return;
+    }
+
+    if (nativeFaqLatestHasTopics(sidebar)) {
+      removeFaqLatestFallback();
+      return;
+    }
+
+    loadFaqLatestTopics().then((topics) => renderFaqLatestFallback(sidebar, topics));
+  }
+
   async function enhanceSubcategoryGrid() {
     const logos = await categoryLogos();
 
@@ -416,6 +578,12 @@ export default apiInitializer((api) => {
       !document.body.classList.contains(exclusiveGridClass);
 
     document.body.classList.toggle(exclusiveFaqClass, enabled);
+
+    if (enabled) {
+      ensureFaqLatestFallback();
+    } else {
+      removeFaqLatestFallback();
+    }
   }
 
   function applyEnhancements() {

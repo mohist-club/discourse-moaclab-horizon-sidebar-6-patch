@@ -10,6 +10,8 @@ export default apiInitializer((api) => {
   const exclusiveFaqClass = "moac-horizon-exclusive-faq-latest";
   const subcategoryLogoClass = "moac-horizon-subcategory-logo";
   const faqModuleClass = "moac-horizon-faq-latest";
+  const faqCachePrefix = "moac-horizon-faq-latest-v1";
+  const faqCacheTtl = 10 * 60 * 1000;
   const originalHeadingAttr = "data-moac-horizon-original-heading";
   const originalStickyTopAttr = "data-moac-horizon-original-sticky-top";
   const sidebarSelectors = [
@@ -52,6 +54,45 @@ export default apiInitializer((api) => {
   let categoryLogosPromise = null;
   let faqLatestPromise = null;
   let faqLatestSourceId = null;
+
+  function wait(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  }
+
+  function faqCacheKey(sourceCategoryId) {
+    return `${faqCachePrefix}:${sourceCategoryId}`;
+  }
+
+  function cachedFaqTopics(sourceCategoryId) {
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem(faqCacheKey(sourceCategoryId)),
+      );
+
+      if (
+        Array.isArray(cached?.topics) &&
+        Date.now() - cached.cachedAt < faqCacheTtl
+      ) {
+        return cached.topics;
+      }
+    } catch {
+      // Storage can be unavailable in privacy modes. The in-memory promise
+      // below still prevents duplicate requests for the current page.
+    }
+
+    return null;
+  }
+
+  function cacheFaqTopics(sourceCategoryId, topics) {
+    try {
+      localStorage.setItem(
+        faqCacheKey(sourceCategoryId),
+        JSON.stringify({ cachedAt: Date.now(), topics }),
+      );
+    } catch {
+      // A storage quota or privacy restriction must not break the sidebar.
+    }
+  }
 
   function guardAnonymousAttachmentClick(event) {
     if (User.current() || event.defaultPrevented) {
@@ -409,26 +450,54 @@ export default apiInitializer((api) => {
     enhanceSubcategoryGrid();
   }
 
+  async function requestLatestFaqTopics(sourceCategoryId) {
+    const cached = cachedFaqTopics(sourceCategoryId);
+    if (cached) {
+      return cached;
+    }
+
+    const configuredDelay = Number(settings.faq_latest_request_delay);
+    const initialDelay = Number.isFinite(configuredDelay)
+      ? Math.max(0, configuredDelay)
+      : 10500;
+    await wait(initialDelay);
+
+    let response = await fetch(`/c/faq/${sourceCategoryId}.json`, {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
+
+    if (response.status === 429) {
+      const retryAfter = Math.max(
+        1,
+        Number.parseFloat(response.headers.get("Retry-After")) || 10,
+      );
+      await wait((retryAfter + 1) * 1000);
+      response = await fetch(`/c/faq/${sourceCategoryId}.json`, {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+    }
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const category = await response.json();
+    const topics = category.topic_list?.topics || [];
+    cacheFaqTopics(sourceCategoryId, topics);
+    return topics;
+  }
+
   function latestFaqTopics(sourceCategoryId) {
     if (faqLatestSourceId !== sourceCategoryId) {
       faqLatestSourceId = sourceCategoryId;
       faqLatestPromise = null;
     }
 
-    faqLatestPromise ??= fetch(`/c/faq/${sourceCategoryId}.json`, {
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Unable to load latest Q&A topics (${response.status})`,
-          );
-        }
-        return response.json();
-      })
-      .then((category) => category.topic_list?.topics || [])
-      .catch(() => null);
+    faqLatestPromise ??= requestLatestFaqTopics(sourceCategoryId).catch(
+      () => null,
+    );
 
     return faqLatestPromise;
   }
@@ -511,10 +580,7 @@ export default apiInitializer((api) => {
 
     module.dataset.state = "loading";
     const sourceKey = module.dataset.sourceKey;
-    const [topics, logos] = await Promise.all([
-      latestFaqTopics(sourceCategoryId),
-      categoryLogos(),
-    ]);
+    const topics = await latestFaqTopics(sourceCategoryId);
     if (!module.isConnected || module.dataset.sourceKey !== sourceKey) {
       return;
     }
@@ -526,7 +592,11 @@ export default apiInitializer((api) => {
     }
 
     if (!topics) {
-      status.textContent = "暂时无法加载，请稍后刷新";
+      const fallback = document.createElement("a");
+      fallback.className = "moac-horizon-faq-latest__fallback";
+      fallback.href = `/c/faq/${sourceCategoryId}`;
+      fallback.textContent = "查看问答/求助";
+      status.replaceChildren(fallback);
       module.dataset.state = "error";
       return;
     }
@@ -542,7 +612,7 @@ export default apiInitializer((api) => {
     const list = document.createElement("ul");
     list.className = "moac-horizon-faq-latest__list";
     const sourceLabel = settings.faq_latest_source_label || "问答/求助";
-    const sourceLogoUrl = logos.get(sourceCategoryId);
+    const sourceLogoUrl = localCategoryLogos().get(sourceCategoryId);
 
     visibleTopics.forEach((topic) => {
       const item = document.createElement("li");

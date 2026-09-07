@@ -136,3 +136,12 @@ faq_latest_topic_limit:
   description:
     en: "Maximum number of latest Q&A topics displayed in the module."
     zh_CN: "模块中显示的最新问答话题数量。"
+
+faq_latest_request_delay:
+  type: integer
+  default: 10500
+  min: 0
+  max: 30000
+  description:
+    en: "Delay before the first uncached Q&A request, in milliseconds, to avoid Discourse's 10-second user rate limit."
+    zh_CN: "首次无缓存的问答请求延迟，单位为毫秒；默认避开 Discourse 的 10 秒用户限流窗口。"

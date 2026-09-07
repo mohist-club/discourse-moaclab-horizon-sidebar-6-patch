@@ -637,6 +637,25 @@
         font-size: var(--font-down-1);
         line-height: 1.4;
       }
+
+      .moac-horizon-faq-latest__fallback {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        color: var(--tertiary);
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--tertiary);
+          outline-offset: 3px;
+          border-radius: 2px;
+        }
+      }
     }
   }
 }

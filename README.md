@@ -47,5 +47,6 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `faq_latest_heading`：模块标题，默认“最新问答”。
 - `faq_latest_source_label`：每张卡片的来源名称，默认“问答/求助”。
 - `faq_latest_topic_limit`：显示条数，默认 `5`。
+- `faq_latest_request_delay`：首次无缓存请求延迟，默认 `10500ms`，用于避开 Discourse 的 10 秒限流窗口。
 
-版本：`1.6.0`
+版本：`1.6.1`

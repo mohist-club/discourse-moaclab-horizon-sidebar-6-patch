@@ -9,6 +9,7 @@ export default apiInitializer((api) => {
   const exclusiveGridClass = "moac-horizon-exclusive-subcategory-grid";
   const subcategoryLogoClass = "moac-horizon-subcategory-logo";
   const originalHeadingAttr = "data-moac-horizon-original-heading";
+  const originalStickyTopAttr = "data-moac-horizon-original-sticky-top";
   const sidebarSelectors = [
     ".tc-right-sidebar",
     ".d-right-sidebar",
@@ -206,7 +207,6 @@ export default apiInitializer((api) => {
       return;
     }
 
-    const top = stickyTop();
     const wasFixed = stack.classList.contains(fixedClass);
 
     if (wasFixed) {
@@ -215,6 +215,24 @@ export default apiInitializer((api) => {
 
     const stackRect = stack.getBoundingClientRect();
     const sidebarRect = sidebar.getBoundingClientRect();
+    const exclusiveGrid = document.body.classList.contains(exclusiveGridClass);
+    let top = stickyTop();
+
+    if (exclusiveGrid) {
+      const storedTop = Number.parseFloat(
+        stack.getAttribute(originalStickyTopAttr),
+      );
+
+      if (Number.isFinite(storedTop)) {
+        top = storedTop;
+      } else {
+        top = Math.max(top, stackRect.top + window.scrollY);
+        stack.setAttribute(originalStickyTopAttr, String(top));
+      }
+    } else {
+      stack.removeAttribute(originalStickyTopAttr);
+    }
+
     const startY = stackRect.top + window.scrollY - top;
 
     if (window.scrollY >= startY) {
@@ -377,6 +395,9 @@ export default apiInitializer((api) => {
 
     if (!enabled) {
       document
+        .querySelectorAll(`.${stackClass}`)
+        .forEach((stack) => stack.removeAttribute(originalStickyTopAttr));
+      document
         .querySelectorAll(`.${subcategoryLogoClass}`)
         .forEach((logo) => logo.remove());
       return;
@@ -413,13 +434,23 @@ export default apiInitializer((api) => {
     settings.enable_right_sidebar_sticky_stack ||
     settings.enable_exclusive_subcategory_grid
   ) {
-    api.onPageChange(scheduleApply);
+    api.onPageChange(() => {
+      document
+        .querySelectorAll(`.${stackClass}`)
+        .forEach((stack) => stack.removeAttribute(originalStickyTopAttr));
+      scheduleApply();
+    });
     ensureObserver();
     scheduleApply();
   }
 
   if (settings.enable_right_sidebar_sticky_stack) {
     window.addEventListener("scroll", scheduleStickyUpdate, { passive: true });
-    window.addEventListener("resize", scheduleStickyUpdate);
+    window.addEventListener("resize", () => {
+      document
+        .querySelectorAll(`.${stackClass}`)
+        .forEach((stack) => stack.removeAttribute(originalStickyTopAttr));
+      scheduleStickyUpdate();
+    });
   }
 });

@@ -47,4 +47,4 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `faq_latest_heading`：模块标题，默认“最新问答”。
 - `faq_latest_topic_limit`：显示条数，默认 `5`。
 
-版本：`1.5.0`
+版本：`1.5.1`

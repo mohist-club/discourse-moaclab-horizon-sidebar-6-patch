@@ -3,7 +3,7 @@
   "about_url": "https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch",
   "component": true,
   "authors": "Moaclab, Codex",
-  "theme_version": "1.5.0",
+  "theme_version": "1.5.1",
   "minimum_discourse_version": "3.0.0",
   "assets": {}
 }

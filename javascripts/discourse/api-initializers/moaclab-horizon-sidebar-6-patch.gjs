@@ -317,10 +317,7 @@ export default apiInitializer((api) => {
           site.categories || site.category_list?.categories || [];
         return logoMap(categories);
       })
-      .catch(() => {
-        categoryLogosPromise = null;
-        return new Map();
-      });
+      .catch(() => new Map());
 
     return categoryLogosPromise.then(
       (remoteLogos) => new Map([...localLogos, ...remoteLogos]),
@@ -431,10 +428,7 @@ export default apiInitializer((api) => {
         return response.json();
       })
       .then((category) => category.topic_list?.topics || [])
-      .catch(() => {
-        faqLatestPromise = null;
-        return [];
-      });
+      .catch(() => null);
 
     return faqLatestPromise;
   }
@@ -482,18 +476,37 @@ export default apiInitializer((api) => {
   }
 
   async function renderFaqLatestModule(module, sourceCategoryId) {
+    if (
+      module.dataset.state === "loading" ||
+      module.dataset.state === "loaded"
+    ) {
+      return;
+    }
+
+    module.dataset.state = "loading";
+    const sourceKey = module.dataset.sourceKey;
     const topics = await latestFaqTopics(sourceCategoryId);
-    if (!module.isConnected) {
+    if (!module.isConnected || module.dataset.sourceKey !== sourceKey) {
       return;
     }
 
     const limit = Math.max(1, Number(settings.faq_latest_topic_limit) || 5);
-    const visibleTopics = topics.slice(0, limit);
     const status = module.querySelector(".moac-horizon-faq-latest__status");
+    if (!status) {
+      return;
+    }
+
+    if (!topics) {
+      status.textContent = "暂时无法加载，请稍后刷新";
+      module.dataset.state = "error";
+      return;
+    }
+
+    const visibleTopics = topics.slice(0, limit);
 
     if (!visibleTopics.length) {
       status.textContent = "暂时没有问答话题";
-      module.dataset.loaded = "true";
+      module.dataset.state = "loaded";
       return;
     }
 
@@ -514,7 +527,7 @@ export default apiInitializer((api) => {
     });
 
     status.replaceWith(list);
-    module.dataset.loaded = "true";
+    module.dataset.state = "loaded";
   }
 
   function updateFaqLatestSidebar() {
@@ -550,7 +563,7 @@ export default apiInitializer((api) => {
     module.dataset.sourceKey = sourceKey;
     placeFaqLatestModule(module, sidebar);
 
-    if (module.dataset.loaded !== "true") {
+    if (!module.dataset.state) {
       renderFaqLatestModule(module, sourceCategoryId);
     }
   }

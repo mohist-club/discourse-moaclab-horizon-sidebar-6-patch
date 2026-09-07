@@ -37,4 +37,4 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `hide_tags_sidebar_section`：隐藏左侧 Tags 区块。
 - `enable_right_sidebar_sticky_stack`：启用右侧后续模块吸顶组。
 
-版本：`1.4.2`
+版本：`1.4.3`

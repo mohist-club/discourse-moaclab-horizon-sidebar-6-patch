@@ -95,8 +95,8 @@ enable_exclusive_faq_latest:
   type: bool
   default: true
   description:
-    en: "On selected categories, show only a sticky list of the latest topics from the Q&A category."
-    zh_CN: "在指定类别中，仅显示来自问答/求助类别的最新话题吸顶模块。"
+    en: "On selected categories, show only the native Right Sidebar Blocks category-topics block and keep it sticky."
+    zh_CN: "在指定类别中，仅显示 Right Sidebar Blocks 原生 category-topics 区块并保持吸顶。"
 
 exclusive_faq_latest_categories:
   type: list
@@ -106,42 +106,9 @@ exclusive_faq_latest_categories:
     en: "Categories that use the exclusive latest Q&A module. Defaults to Keycaps and Resources."
     zh_CN: "启用独占最新问答模块的类别；默认是键帽库和资源。"
 
-faq_latest_source_category_id:
-  type: integer
-  default: 4
-  min: 1
-  description:
-    en: "Category ID used as the source for the latest Q&A topics."
-    zh_CN: "最新问答话题来源类别的 ID；默认是问答/求助类别 4。"
-
 faq_latest_heading:
   type: string
   default: "最新问答"
   description:
-    en: "Heading displayed above the latest Q&A topic list."
-    zh_CN: "最新问答话题列表上方显示的标题。"
-
-faq_latest_source_label:
-  type: string
-  default: "问答/求助"
-  description:
-    en: "Source label displayed in each latest Q&A card."
-    zh_CN: "每张最新问答卡片顶部显示的来源名称。"
-
-faq_latest_topic_limit:
-  type: integer
-  default: 5
-  min: 1
-  max: 10
-  description:
-    en: "Maximum number of latest Q&A topics displayed in the module."
-    zh_CN: "模块中显示的最新问答话题数量。"
-
-faq_latest_request_delay:
-  type: integer
-  default: 10500
-  min: 0
-  max: 30000
-  description:
-    en: "Delay before the first uncached Q&A request, in milliseconds, to avoid Discourse's 10-second user rate limit."
-    zh_CN: "首次无缓存的问答请求延迟，单位为毫秒；默认避开 Discourse 的 10 秒用户限流窗口。"
+    en: "Visual heading displayed above the native category-topics block."
+    zh_CN: "Right Sidebar Blocks 原生 category-topics 区块上方显示的视觉标题。"

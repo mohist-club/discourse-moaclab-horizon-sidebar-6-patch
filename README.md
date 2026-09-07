@@ -15,9 +15,19 @@ Moaclab 的 Discourse 主题组件，用于补充 Horizon Sidebar 6 和 Right Si
   - 工作室模块随页面滚动，并保持在首次显示时的原始纵向位置；
   - 其他类别继续使用原有右侧模块。
 - 在键帽库（ID `8`）和资源（ID `9`）右侧仅显示“最新问答”模块：
-  - 数据直接读取问答/求助类别（ID `4`）的服务器最新话题；
-  - 默认显示 5 条，每张卡片包含类别 Logo、相对时间、标题、点赞数和评论数；
+  - 直接复用 Right Sidebar Blocks 自带的 `category-topics` 区块，不再由本组件调用任何类别 JSON 接口；
+  - 数据请求、路由切换和缓存全部交给 Discourse 原生数据层；
   - 模块保持原始纵向位置吸顶。
+
+## Right Sidebar Blocks 配置
+
+在 **Right Sidebar Blocks → blocks** 中添加一个区块：
+
+- `name`: `category-topics`
+- 参数 `id`: `4`
+- 参数 `count`: `5`
+
+本组件在键帽库和资源页面只显示这个原生区块，并负责“最新问答”标题、列表样式和吸顶。请删除旧的自定义“最新问答”区块；从 `1.7.0` 起，本组件不会再请求 `/c/faq/4.json`。
 
 ## 安装或更新
 
@@ -43,10 +53,6 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `enable_right_sidebar_sticky_stack`：启用右侧后续模块吸顶组。
 - `enable_exclusive_faq_latest`：启用指定类别的独占“最新问答”模块。
 - `exclusive_faq_latest_categories`：选择显示该模块的类别，默认键帽库和资源。
-- `faq_latest_source_category_id`：话题来源类别 ID，默认 `4`。
 - `faq_latest_heading`：模块标题，默认“最新问答”。
-- `faq_latest_source_label`：每张卡片的来源名称，默认“问答/求助”。
-- `faq_latest_topic_limit`：显示条数，默认 `5`。
-- `faq_latest_request_delay`：首次无缓存请求延迟，默认 `10500ms`，用于避开 Discourse 的 10 秒限流窗口。
 
-版本：`1.6.2`
+版本：`1.7.0`

@@ -488,7 +488,7 @@
     .right-sidebar-blocks,
     .sidebar-right,
     aside[class*="sidebar"] {
-      .rs-component:not(.moac-horizon-faq-latest) {
+      .rs-component:not(.rs-category-topics) {
         display: none !important;
       }
 
@@ -503,7 +503,7 @@
         }
       }
 
-      .rs-component.moac-horizon-faq-latest {
+      .rs-component.rs-category-topics {
         display: block;
         width: 100%;
         margin: 0;
@@ -511,149 +511,70 @@
         border: 0;
         background: transparent;
         box-shadow: none;
-      }
 
-      .moac-horizon-faq-latest__heading {
-        box-sizing: border-box;
-        width: 100%;
-        min-height: 40px;
-        margin: 0 0 0.75rem;
-        padding: 0 0 0.75rem;
-        border-bottom: 1px solid var(--moac-horizon-sidebar-line);
-        color: var(--primary);
-        font-size: #{$right_sidebar_module_heading_font_size}px;
-        line-height: 1.2;
-        font-weight: 800;
-        letter-spacing: -0.025em;
-      }
-
-      .moac-horizon-faq-latest__list {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        border-top: 1px solid var(--moac-horizon-sidebar-line);
-      }
-
-      .moac-horizon-faq-latest__item {
-        margin: 0;
-        padding: 0;
-        border-bottom: 1px solid var(--moac-horizon-sidebar-line);
-      }
-
-      .moac-horizon-faq-latest__link {
-        display: flex;
-        flex-direction: column;
-        gap: 0.65rem;
-        box-sizing: border-box;
-        min-height: 44px;
-        padding: 1rem 0.75rem;
-        background: color-mix(in srgb, var(--primary) 3.5%, transparent);
-        color: var(--primary);
-        text-decoration: none;
-        transition: background-color 150ms ease;
-
-        &:hover {
-          background: color-mix(in srgb, var(--primary) 7%, transparent);
-        }
-
-        &:focus-visible {
-          outline: 2px solid var(--tertiary);
-          outline-offset: -2px;
-          border-radius: 3px;
-        }
-      }
-
-      .moac-horizon-faq-latest__source {
-        display: flex;
-        align-items: center;
-        min-width: 0;
-        color: var(--primary-medium);
-        font-size: 12px;
-        line-height: 1.2;
-
-        strong {
-          overflow: hidden;
-          color: var(--primary);
-          font-weight: 700;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        time {
-          flex: none;
-          white-space: nowrap;
-        }
-      }
-
-      .moac-horizon-faq-latest__logo {
-        display: grid;
-        flex: 0 0 26px;
-        place-items: center;
-        width: 26px;
-        height: 26px;
-        margin-right: 0.55rem;
-        overflow: hidden;
-        border-radius: 50%;
-        background: var(--secondary);
-        color: var(--primary-medium);
-        font-size: 13px;
-        font-weight: 700;
-
-        img {
+        &::before {
           display: block;
+          box-sizing: border-box;
           width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      }
-
-      .moac-horizon-faq-latest__separator {
-        flex: none;
-        margin: 0 0.45rem;
-      }
-
-      .moac-horizon-faq-latest__title {
-        display: -webkit-box;
-        overflow: hidden;
-        color: var(--primary-high);
-        font-size: #{$top_topics_item_title_font_size}px;
-        line-height: 1.35;
-        font-weight: 700;
-        letter-spacing: -0.015em;
-        overflow-wrap: anywhere;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-      }
-
-      .moac-horizon-faq-latest__metrics {
-        color: var(--primary-medium);
-        font-size: 12px;
-        line-height: 1.25;
-      }
-
-      .moac-horizon-faq-latest__status {
-        margin: 0;
-        color: var(--moac-horizon-sidebar-muted);
-        font-size: var(--font-down-1);
-        line-height: 1.4;
-      }
-
-      .moac-horizon-faq-latest__fallback {
-        display: inline-flex;
-        align-items: center;
-        min-height: 44px;
-        color: var(--tertiary);
-        font-weight: 600;
-        text-decoration: none;
-
-        &:hover {
-          text-decoration: underline;
+          min-height: 40px;
+          margin: 0 0 0.75rem;
+          padding: 0 0 0.75rem;
+          border-bottom: 1px solid var(--moac-horizon-sidebar-line);
+          color: var(--primary);
+          font-size: #{$right_sidebar_module_heading_font_size}px;
+          line-height: 1.2;
+          font-weight: 800;
+          letter-spacing: -0.025em;
+          content: "#{$faq_latest_heading}";
         }
 
-        &:focus-visible {
-          outline: 2px solid var(--tertiary);
-          outline-offset: 3px;
-          border-radius: 2px;
+        > .badge-wrapper {
+          display: none;
+        }
+
+        .category-topics--content {
+          margin: 0;
+          padding: 0;
+          border-top: 1px solid var(--moac-horizon-sidebar-line);
+        }
+
+        .category-topics--topic {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 0.75rem;
+          box-sizing: border-box;
+          min-height: 44px;
+          margin: 0;
+          padding: 0.9rem 0.75rem;
+          border-bottom: 1px solid var(--moac-horizon-sidebar-line);
+          background: color-mix(in srgb, var(--primary) 3.5%, transparent);
+          color: var(--primary-high);
+          font-size: #{$top_topics_item_title_font_size}px;
+          line-height: 1.35;
+          font-weight: 700;
+          text-decoration: none;
+          overflow-wrap: anywhere;
+          transition: background-color 150ms ease;
+
+          &:hover {
+            background: color-mix(in srgb, var(--primary) 7%, transparent);
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--tertiary);
+            outline-offset: -2px;
+            border-radius: 3px;
+          }
+        }
+
+        .category-topics--posts-count {
+          flex: none;
+          color: var(--primary-medium);
+          font-size: 12px;
+          line-height: 1.25;
+          font-weight: 500;
+          white-space: nowrap;
         }
       }
     }

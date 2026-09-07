@@ -11,7 +11,7 @@ export default apiInitializer((api) => {
   const subcategoryLogoClass = "moac-horizon-subcategory-logo";
   const faqModuleClass = "moac-horizon-faq-latest";
   const faqCachePrefix = "moac-horizon-faq-latest-v1";
-  const faqCacheTtl = 10 * 60 * 1000;
+  const faqCacheTtl = 60 * 60 * 1000;
   const originalHeadingAttr = "data-moac-horizon-original-heading";
   const originalStickyTopAttr = "data-moac-horizon-original-sticky-top";
   const sidebarSelectors = [
@@ -462,22 +462,10 @@ export default apiInitializer((api) => {
       : 10500;
     await wait(initialDelay);
 
-    let response = await fetch(`/c/faq/${sourceCategoryId}.json`, {
-      credentials: "same-origin",
+    const response = await fetch(`/c/faq/${sourceCategoryId}.json`, {
+      credentials: "omit",
       headers: { Accept: "application/json" },
     });
-
-    if (response.status === 429) {
-      const retryAfter = Math.max(
-        1,
-        Number.parseFloat(response.headers.get("Retry-After")) || 10,
-      );
-      await wait((retryAfter + 1) * 1000);
-      response = await fetch(`/c/faq/${sourceCategoryId}.json`, {
-        credentials: "same-origin",
-        headers: { Accept: "application/json" },
-      });
-    }
 
     if (!response.ok) {
       return null;

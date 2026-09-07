@@ -49,4 +49,4 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `faq_latest_topic_limit`：显示条数，默认 `5`。
 - `faq_latest_request_delay`：首次无缓存请求延迟，默认 `10500ms`，用于避开 Discourse 的 10 秒限流窗口。
 
-版本：`1.6.1`
+版本：`1.6.2`

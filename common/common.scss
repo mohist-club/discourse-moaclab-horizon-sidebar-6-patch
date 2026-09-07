@@ -332,13 +332,8 @@
       }
 
       .moac-horizon-sticky-stack {
-        position: static !important;
-        inset: auto !important;
-        width: auto !important;
-        max-height: none !important;
         margin-top: 0;
-        padding-top: 0;
-        overflow: visible !important;
+        padding-top: 10px;
         background: transparent;
         backdrop-filter: none;
 
@@ -350,7 +345,7 @@
       .rs-component.rs-subcategory-list {
         container-type: inline-size;
         width: 100%;
-        margin: 10px 0 0;
+        margin: 0;
         padding: 0;
         border: 0;
         background: transparent;

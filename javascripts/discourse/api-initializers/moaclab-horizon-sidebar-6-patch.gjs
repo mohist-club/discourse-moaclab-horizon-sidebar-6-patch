@@ -199,12 +199,7 @@ export default apiInitializer((api) => {
   function updateStickyPosition() {
     const stack = document.querySelector(`.${stackClass}`);
     const sidebar = stack?.closest(sidebarSelectors);
-    if (
-      !stack ||
-      !sidebar ||
-      document.body.classList.contains(exclusiveGridClass) ||
-      window.matchMedia("(max-width: 960px)").matches
-    ) {
+    if (!stack || !sidebar || window.matchMedia("(max-width: 960px)").matches) {
       if (stack) {
         clearFixedStack(stack);
       }

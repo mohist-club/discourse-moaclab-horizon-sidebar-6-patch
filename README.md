@@ -12,6 +12,7 @@ Moaclab 的 Discourse 主题组件，用于补充 Horizon Sidebar 6 和 Right Si
   - 该类别右侧只显示子类别模块；
   - 自动读取 Discourse 服务器上的类别 Logo；
   - 窄侧栏使用 2 列，常规及宽侧栏使用设置中的列数（默认 3 列）；
+  - 工作室模块随页面滚动，并固定在顶部导航下方；
   - 其他类别继续使用原有右侧模块。
 
 ## 安装或更新
@@ -37,4 +38,4 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `hide_tags_sidebar_section`：隐藏左侧 Tags 区块。
 - `enable_right_sidebar_sticky_stack`：启用右侧后续模块吸顶组。
 
-版本：`1.4.3`
+版本：`1.4.4`

@@ -7,7 +7,9 @@ export default apiInitializer((api) => {
   const fixedClass = "is-moac-horizon-fixed";
   const wrappedAttr = "data-moac-horizon-sticky-stack";
   const exclusiveGridClass = "moac-horizon-exclusive-subcategory-grid";
+  const exclusiveFaqClass = "moac-horizon-exclusive-faq-latest";
   const subcategoryLogoClass = "moac-horizon-subcategory-logo";
+  const faqModuleClass = "moac-horizon-faq-latest";
   const originalHeadingAttr = "data-moac-horizon-original-heading";
   const originalStickyTopAttr = "data-moac-horizon-original-sticky-top";
   const sidebarSelectors = [
@@ -48,6 +50,8 @@ export default apiInitializer((api) => {
   let applying = false;
   let stickyFrame = null;
   let categoryLogosPromise = null;
+  let faqLatestPromise = null;
+  let faqLatestSourceId = null;
 
   function guardAnonymousAttachmentClick(event) {
     if (User.current() || event.defaultPrevented) {
@@ -215,10 +219,12 @@ export default apiInitializer((api) => {
 
     const stackRect = stack.getBoundingClientRect();
     const sidebarRect = sidebar.getBoundingClientRect();
-    const exclusiveGrid = document.body.classList.contains(exclusiveGridClass);
+    const exclusiveSticky =
+      document.body.classList.contains(exclusiveGridClass) ||
+      document.body.classList.contains(exclusiveFaqClass);
     let top = stickyTop();
 
-    if (exclusiveGrid) {
+    if (exclusiveSticky) {
       const storedTop = Number.parseFloat(
         stack.getAttribute(originalStickyTopAttr),
       );
@@ -406,11 +412,155 @@ export default apiInitializer((api) => {
     enhanceSubcategoryGrid();
   }
 
+  function latestFaqTopics(sourceCategoryId) {
+    if (faqLatestSourceId !== sourceCategoryId) {
+      faqLatestSourceId = sourceCategoryId;
+      faqLatestPromise = null;
+    }
+
+    faqLatestPromise ??= fetch(`/c/faq/${sourceCategoryId}.json`, {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Unable to load latest Q&A topics (${response.status})`,
+          );
+        }
+        return response.json();
+      })
+      .then((category) => category.topic_list?.topics || [])
+      .catch(() => {
+        faqLatestPromise = null;
+        return [];
+      });
+
+    return faqLatestPromise;
+  }
+
+  function topicUrl(topic) {
+    const slug = encodeURIComponent(topic.slug || "topic");
+    return `/t/${slug}/${topic.id}`;
+  }
+
+  function createFaqLatestModule() {
+    const module = document.createElement("section");
+    module.className = `rs-component ${faqModuleClass}`;
+    module.setAttribute("aria-labelledby", "moac-horizon-faq-latest-heading");
+
+    const heading = document.createElement("h2");
+    heading.id = "moac-horizon-faq-latest-heading";
+    heading.className = "moac-horizon-faq-latest__heading";
+    heading.textContent = settings.faq_latest_heading || "最新问答";
+
+    const status = document.createElement("p");
+    status.className = "moac-horizon-faq-latest__status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.textContent = "正在加载…";
+
+    module.append(heading, status);
+    return module;
+  }
+
+  function placeFaqLatestModule(module, sidebar) {
+    let stack = sidebar.querySelector(`.${stackClass}`);
+
+    if (!stack) {
+      stack = document.createElement("div");
+      stack.className = stackClass;
+      stack.setAttribute(wrappedAttr, "true");
+      sidebar.prepend(stack);
+    }
+
+    if (module.parentElement !== stack) {
+      stack.prepend(module);
+    }
+
+    scheduleStickyUpdate();
+  }
+
+  async function renderFaqLatestModule(module, sourceCategoryId) {
+    const topics = await latestFaqTopics(sourceCategoryId);
+    if (!module.isConnected) {
+      return;
+    }
+
+    const limit = Math.max(1, Number(settings.faq_latest_topic_limit) || 5);
+    const visibleTopics = topics.slice(0, limit);
+    const status = module.querySelector(".moac-horizon-faq-latest__status");
+
+    if (!visibleTopics.length) {
+      status.textContent = "暂时没有问答话题";
+      module.dataset.loaded = "true";
+      return;
+    }
+
+    const list = document.createElement("ul");
+    list.className = "moac-horizon-faq-latest__list";
+
+    visibleTopics.forEach((topic) => {
+      const item = document.createElement("li");
+      item.className = "moac-horizon-faq-latest__item";
+
+      const link = document.createElement("a");
+      link.className = "moac-horizon-faq-latest__link";
+      link.href = topicUrl(topic);
+      link.textContent = topic.unicode_title || topic.title;
+
+      item.appendChild(link);
+      list.appendChild(item);
+    });
+
+    status.replaceWith(list);
+    module.dataset.loaded = "true";
+  }
+
+  function updateFaqLatestSidebar() {
+    const categoryIds = configuredCategoryIds(
+      settings.exclusive_faq_latest_categories,
+    );
+    const enabled =
+      settings.enable_exclusive_faq_latest &&
+      categoryIds.includes(currentCategoryId()) &&
+      !document.body.classList.contains(exclusiveGridClass);
+
+    document.body.classList.toggle(exclusiveFaqClass, enabled);
+
+    const sidebar = document.querySelector(sidebarSelectors);
+    const existingModule = document.querySelector(`.${faqModuleClass}`);
+
+    if (!enabled || !sidebar) {
+      existingModule?.remove();
+      return;
+    }
+
+    const sourceCategoryId =
+      Number(settings.faq_latest_source_category_id) || 4;
+    const sourceKey = `${sourceCategoryId}:${settings.faq_latest_topic_limit}:${settings.faq_latest_heading}`;
+    let module = existingModule;
+
+    if (module?.dataset.sourceKey !== sourceKey) {
+      module?.remove();
+      module = null;
+    }
+
+    module ??= createFaqLatestModule();
+    module.dataset.sourceKey = sourceKey;
+    placeFaqLatestModule(module, sidebar);
+
+    if (module.dataset.loaded !== "true") {
+      renderFaqLatestModule(module, sourceCategoryId);
+    }
+  }
+
   function applyEnhancements() {
     if (settings.enable_right_sidebar_sticky_stack) {
       applyStickyStack();
     }
     updateCategorySpecificSidebar();
+    updateFaqLatestSidebar();
   }
 
   function scheduleApply() {
@@ -432,7 +582,8 @@ export default apiInitializer((api) => {
 
   if (
     settings.enable_right_sidebar_sticky_stack ||
-    settings.enable_exclusive_subcategory_grid
+    settings.enable_exclusive_subcategory_grid ||
+    settings.enable_exclusive_faq_latest
   ) {
     api.onPageChange(() => {
       document

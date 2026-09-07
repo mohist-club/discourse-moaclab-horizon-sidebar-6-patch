@@ -14,6 +14,10 @@ Moaclab 的 Discourse 主题组件，用于补充 Horizon Sidebar 6 和 Right Si
   - 窄侧栏使用 2 列，常规及宽侧栏使用设置中的列数（默认 3 列）；
   - 工作室模块随页面滚动，并保持在首次显示时的原始纵向位置；
   - 其他类别继续使用原有右侧模块。
+- 在键帽库（ID `8`）和资源（ID `9`）右侧仅显示“最新问答”模块：
+  - 数据直接读取问答/求助类别（ID `4`）的服务器最新话题；
+  - 默认显示 5 条，使用原生主题色与 14px 话题标题；
+  - 模块保持原始纵向位置吸顶。
 
 ## 安装或更新
 
@@ -37,5 +41,10 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 - `subcategory_grid_columns`：宽侧栏中的最大列数。
 - `hide_tags_sidebar_section`：隐藏左侧 Tags 区块。
 - `enable_right_sidebar_sticky_stack`：启用右侧后续模块吸顶组。
+- `enable_exclusive_faq_latest`：启用指定类别的独占“最新问答”模块。
+- `exclusive_faq_latest_categories`：选择显示该模块的类别，默认键帽库和资源。
+- `faq_latest_source_category_id`：话题来源类别 ID，默认 `4`。
+- `faq_latest_heading`：模块标题，默认“最新问答”。
+- `faq_latest_topic_limit`：显示条数，默认 `5`。
 
-版本：`1.4.5`
+版本：`1.5.0`

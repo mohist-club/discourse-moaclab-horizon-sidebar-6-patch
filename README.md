@@ -11,7 +11,7 @@ Moaclab 的 Discourse 主题组件，用于补充 Horizon Sidebar 6 和 Right Si
 - 可为指定类别启用独占的“子类别 Logo 网格”。默认类别是键盘（ID `13`）：
   - 该类别右侧只显示子类别模块；
   - 自动读取 Discourse 服务器上的类别 Logo；
-  - 窄侧栏使用 2 列，中等侧栏使用 3 列，宽侧栏最多使用设置中的列数（默认 4 列）；
+  - 窄侧栏使用 2 列，常规及宽侧栏使用设置中的列数（默认 3 列）；
   - 其他类别继续使用原有右侧模块。
 
 ## 安装或更新
@@ -32,8 +32,9 @@ https://github.com/mohist-club/discourse-moaclab-horizon-sidebar-6-patch.git
 
 - `enable_exclusive_subcategory_grid`：启用指定类别的独占子类别网格。
 - `exclusive_subcategory_grid_categories`：选择使用该布局的类别。
+- `subcategory_grid_heading`：设置网格标题，默认显示“工作室”。
 - `subcategory_grid_columns`：宽侧栏中的最大列数。
 - `hide_tags_sidebar_section`：隐藏左侧 Tags 区块。
 - `enable_right_sidebar_sticky_stack`：启用右侧后续模块吸顶组。
 
-版本：`1.4.1`
+版本：`1.4.2`

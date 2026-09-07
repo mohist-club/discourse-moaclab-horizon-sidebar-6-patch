@@ -8,6 +8,7 @@ export default apiInitializer((api) => {
   const wrappedAttr = "data-moac-horizon-sticky-stack";
   const exclusiveGridClass = "moac-horizon-exclusive-subcategory-grid";
   const subcategoryLogoClass = "moac-horizon-subcategory-logo";
+  const originalHeadingAttr = "data-moac-horizon-original-heading";
   const sidebarSelectors = [
     ".tc-right-sidebar",
     ".d-right-sidebar",
@@ -356,6 +357,28 @@ export default apiInitializer((api) => {
       categoryIds.includes(currentCategoryId());
 
     document.body.classList.toggle(exclusiveGridClass, enabled);
+
+    document
+      .querySelectorAll(
+        ".rs-component.rs-subcategory-list .subcategory-list--heading",
+      )
+      .forEach((heading) => {
+        if (enabled) {
+          if (!heading.hasAttribute(originalHeadingAttr)) {
+            heading.setAttribute(
+              originalHeadingAttr,
+              heading.textContent.trim(),
+            );
+          }
+          heading.textContent = settings.subcategory_grid_heading || "工作室";
+          return;
+        }
+
+        if (heading.hasAttribute(originalHeadingAttr)) {
+          heading.textContent = heading.getAttribute(originalHeadingAttr);
+          heading.removeAttribute(originalHeadingAttr);
+        }
+      });
 
     if (!enabled) {
       document

@@ -75,9 +75,16 @@ exclusive_subcategory_grid_categories:
     en: "Categories that use the exclusive right-sidebar subcategory logo grid."
     zh_CN: "启用右侧子类别 Logo 网格的类别；默认是键盘类别。"
 
+subcategory_grid_heading:
+  type: string
+  default: "工作室"
+  description:
+    en: "Heading displayed above the exclusive subcategory logo grid."
+    zh_CN: "独占子类别 Logo 网格上方显示的标题。"
+
 subcategory_grid_columns:
   type: integer
-  default: 4
+  default: 3
   min: 2
   max: 6
   description:
